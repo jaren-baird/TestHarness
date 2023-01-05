@@ -54,7 +54,7 @@ public class ErrorTable
 		wd.findElement(By.id("Username")).sendKeys("fceleste");
 		wd.findElement(By.id("Password")).click();
 		wd.findElement(By.id("Password")).clear();
-		wd.findElement(By.id("Password")).sendKeys("C@11ware1234");
+		wd.findElement(By.id("Password")).sendKeys("[short jitc]1234");
 		wd.findElement(By.id("loginButton")).click();
 		
 		

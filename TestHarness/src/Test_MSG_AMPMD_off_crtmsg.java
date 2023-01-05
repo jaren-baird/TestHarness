@@ -31,7 +31,7 @@ public class Test_MSG_AMPMD_off_crtmsg
         wd.findElement(By.id("Username")).sendKeys("fceleste");
         wd.findElement(By.id("Password")).click();
         wd.findElement(By.id("Password")).clear();
-        wd.findElement(By.id("Password")).sendKeys("C@11ware1234");
+        wd.findElement(By.id("Password")).sendKeys("[short jitc]1234");
         wd.findElement(By.id("loginButton")).click();
         wd.findElement(By.cssSelector("a.brand")).click();
         wd.findElement(By.linkText("Test Cases")).click();

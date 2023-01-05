@@ -108,7 +108,7 @@ public class WebDriverLoginDev
         wd.findElement(By.id("Username")).sendKeys("fceleste");
         wd.findElement(By.id("Password")).click();
         wd.findElement(By.id("Password")).clear();
-        wd.findElement(By.id("Password")).sendKeys("C@11ware1234");
+        wd.findElement(By.id("Password")).sendKeys("[short jitc]1234");
         wd.findElement(By.id("loginButton")).click();
         wd.findElement(By.cssSelector("a.brand")).click();
         wd.findElement(By.linkText("Test Cases")).click();
@@ -277,8 +277,7 @@ public class WebDriverLoginDev
 		        wd.findElement(By.id("uxLogin_UserName")).sendKeys("jaren");
 		        wd.findElement(By.id("uxLogin_Password")).click();
 		        wd.findElement(By.id("uxLogin_Password")).clear();
-		        //wd.findElement(By.id("uxLogin_Password")).sendKeys("C@11ware");
-		        wd.findElement(By.id("uxLogin_Password")).sendKeys("J@ren008");
+		        //wd.findElement(By.id("uxLogin_Password")).sendKeys("[short jitc]");
 		        wd.findElement(By.id("uxLogin_LoginButton")).click();
 	        }
 	        else if(wd.findElement(By.tagName("html")).getText().contains("Agree"))

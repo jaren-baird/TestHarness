@@ -250,8 +250,7 @@ public class WebDriverLoginLegacy
 		        wd.findElement(By.id("uxLogin_UserName")).sendKeys("jaren");
 		        wd.findElement(By.id("uxLogin_Password")).click();
 		        wd.findElement(By.id("uxLogin_Password")).clear();
-		        //wd.findElement(By.id("uxLogin_Password")).sendKeys("C@11ware");
-		        wd.findElement(By.id("uxLogin_Password")).sendKeys("J@ren008");
+		        //wd.findElement(By.id("uxLogin_Password")).sendKeys("[short jitc]");
 		        wd.findElement(By.id("uxLogin_LoginButton")).click();
 	        }
 	        else if(wd.findElement(By.tagName("html")).getText().contains("Agree"))
