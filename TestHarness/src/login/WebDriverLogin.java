@@ -41,7 +41,7 @@ public class WebDriverLogin
 	public static long varMultiplier = 1000*1000; //millisecond*1000=nanosecond 1000*1000 = 1 second
 	public static String calledNumber = setVariable("calledNumber"); //"5789@10.16.99.23";
 	public static String webAdminUser = setVariable("webAdminUser"); //"administrator"; //"jaren";
-	public static String webAdminPW = setVariable("webAdminPW"); //""; //"AgentString@007";
+	public static String webAdminPW = setVariable("webAdminPW"); 
 	
 	//Getters and Setters 			 
 	public static void main(String[] args) throws Exception
@@ -1946,7 +1946,7 @@ public class WebDriverLogin
 		String webadminIP = "https://qatestsp3/webadmin/"; //"https://2016vm4fc/webadmin/";//"https://webadmintest/WebAdmin/";
 		String calledNumber = "5789@10.16.99.23";
 		String webAdminUser = "administrator"; //"jaren";
-		String webAdminPW = "[long jitc]"; //"Agent@007";
+		String webAdminPW = "[long jitc]";
 		String returnValue = "";
 		
 		String fileName = "WebDriverLogin.config";
