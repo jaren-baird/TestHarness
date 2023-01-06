@@ -28,7 +28,7 @@ public class TestHarnessAuto
 	private static String FileType = ".jar";
 	private static String processArgs = "java.exe -jar "; //program used with initial arg //trailing space required
 	public static int debug = 0; //1 to enable 0 to disable
-	public static int tcresult = 0; //debug must not be 1 and tcresult must be 0 to run TCResult
+	public static int tcresult = 1; //debug must not be 1 and tcresult must be 0 to run TCResult
 	public static int fileLength = 0;
 	private static final String TASKLIST = "tasklist";
 	private static final String KILL = "taskkill /F /IM ";
@@ -41,7 +41,6 @@ public class TestHarnessAuto
 	
 	public static void main(String[] args) 
     {
-		//WebDriverLogin.waitT(wd, (3*60*60*1000)); //stall for 3 hours before running today 6/20/19
 		Timer timer = new Timer();
 		try 
 		{
@@ -49,12 +48,12 @@ public class TestHarnessAuto
 			{
 			    public void run() 
 			    {
-			    	File setup = new File(TEST_DIRNAME);
-			    	File[] Dictionary = setup.listFiles(new FilenameFilter()
+			    	File setup = new File(TEST_DIRNAME); //folder where the runnable jar tests are located
+			    	File[] Dictionary = setup.listFiles(new FilenameFilter() //list of tests that meet filter criteria
 					{
 					    public boolean accept(File dir, String name) 
 					    {
-					        return name.contains(JARNAME) && name.endsWith(FileType);
+					        return name.contains(JARNAME) && name.endsWith(FileType); //contains "-" and "jar"
 					    }
 					});
 			    	if(Dictionary != null)
@@ -73,7 +72,7 @@ public class TestHarnessAuto
 			    		runsFails[0] = runsFails[0] + 1; //total runs incremented
 			    	}
 			    	
-					Scanner keyboard2 = null;
+					Scanner keyboard2 = null; //not used in auto mode (no input from a user required)
 					int j = 0;
 					int result = 0;
 					int groupNum = 0;
@@ -81,7 +80,7 @@ public class TestHarnessAuto
 					TestGroup[fileLength-1] = 0;
 					TestGroup[0] = j;
 
-					//setup Groups and their numbers
+					//setup Groups and their numbers (naming convention dictates which files are part of a group)
 					for(int i = 0; i < fileLength; i++)
 					{
 						if(i < fileLength-1)
@@ -120,15 +119,15 @@ public class TestHarnessAuto
 						}
 					}
 					
-					int Length2D = ((groupNum+1)*(groupNum+1)) - 2;
+					int Length2D = ((groupNum+1)*(groupNum+1)) - 2; //two dimensional test format
 					int CurrentD = 0;
 					Scanner keyboard = null;
-					int dimension = 1;
+					int dimension = 1; //currently configured for one dimensional testing
 					String timeLog = new SimpleDateFormat("MM-dd-yyyy_HH;mm;ss").format(Calendar.getInstance().getTime());
 					Logger logger = null;
 					FileHandler fh = null;
 			    	
-					try
+					try //beginning of 
 					{
 						logger = Logger.getLogger("MyLog");
 						fh = new FileHandler(LOGLOC+timeLog+".log");
@@ -144,11 +143,11 @@ public class TestHarnessAuto
 							
 							if(dimension == 1)
 							{
-								oneDimension(logger, TestGroup, result, Dictionary);
+								oneDimension(logger, TestGroup, result, Dictionary); //standard test harness path
 							}
 							
-							if(dimension == 2)//if(dimension == 2)
-							{
+							if(dimension == 2) //TODO: n dimensional testing requires tests to be broken up into 3 parts for finding incompatibility bugs
+							{					//reset defaults, setup environment with involved features, run tests associated with involved features
 								twoDimension(logger, TestGroup, result, Dictionary, CurrentD, Length2D, groupNum);
 							}
 							dimension = 0;
@@ -185,110 +184,51 @@ public class TestHarnessAuto
 		} 
     }
 	
-	
-	
-	public static void groupTest(String plaHldr, String stage, int group, Logger logger, int current, int length) throws Exception
+	public static void oneDimension(Logger logger, int[] TestGroup, int result, File[] Dictionary)
 	{
-		int result = -1;
-		if(plaHldr.replaceAll("[0-9]", "").substring(plaHldr.length()-(FileType.length()+2), plaHldr.length()-(FileType.length()+1)).equals(stage))
-		{
-			result = RunJar(plaHldr);
-			Print(plaHldr, group, current, length, result, logger);
-		}
-	}
-	
-	public static void Print(String plaHldr, int group, int current, int Length, int result, Logger logger) throws Exception
-	{
-		Scanner keyboard = null;
-		int connection = 0;
-		String retries = "";
-		String failsCounter = "";
-		if(retry > 0)
-		{
-			retries = " Retries: "+retry;
-		}
+		long startTime = 0;
+		int estimatedTime = 0;
 		
-		if(debug == 1)
+		logger.info("1 Dimension \n");
+		for(int i = 0; i < (fileLength); i++)
 		{
-			System.out.print("DEBUG:: ");
-			logger.info("::DEBUG::");
-		}
-		if(result == 0 || result == 3)
-		{
-			if(result == 3)
+			if(TestGroup[i] != -1) //-1 is only relevant if this function is being used -> CheckTest(Dictionary[i].toString()))
 			{
-				System.out.print("SKIPPED:: ");
-				logger.info("::SKIPPED::");
-			}
-			if(runsFails[current] > 0)
-			{
-				failsCounter = " :Fails/Runs:" +runsFails[current]+ "/" +runsFails[0];
-			}
-			System.out.print("Success: ");
-			logger.info("Success: " + (current)+"/"+Length + " Group: " + group + " Current: " + 
-			plaHldr.replace(TEST_DIRNAME, "") + failsCounter + retries + "\n"); 
-		}
-		else
-		{
-			if(result == -999 || result == -998)
-			{
-				keyboard = null;
 				try
 				{
-					keyboard = new Scanner(System.in);
-					if(result == -999)
-					{
-						logger.info(result+" Connection Error: " + (current)+"/"+Length + " Group: " + group + " Current: " + plaHldr.replace(TEST_DIRNAME, "") + "\n");
-						//System.out.println("Connection Error: Choose 1 to continue or 0 to quit.");
-						connection = 1;//keyboard.nextInt(); //connection = 1;
-						Thread.sleep(120000);
-						if(connection == 0)
-							throw new Exception("Connection Error");
-						else if(connection == 1)
-							logger.info("continuing from connection error");
-					}
-					else if(result == -998)
-					{
-						logger.info(result+" Aborted: " + (current)+"/"+Length + " Group: " + group + " Current: " + plaHldr.replace(TEST_DIRNAME, "") + "\n");
-						System.out.println("Aborted current test: Choose 1 to continue or 0 to quit.");
-						connection = 1; //connection = keyboard.nextInt(); //connection = 1;
-						//Thread.sleep(120000);
-						if(connection == 0)
-							throw new Exception("Aborted");
-						else if(connection == 1)
-							logger.info("continuing from Abort");
-					}
+					//startTime = System.nanoTime();
+					result = RunJar(Dictionary[i].toString()); 
+					if(result == 1)
+						Thread.sleep(1000);
+					if(result < -900000)
+						System.out.println(""+result);
+					Print(Dictionary[i].toString(), TestGroup[i], i+1, fileLength, result, logger);
+					//estimatedTime = ((int)(System.nanoTime() - startTime/(10^9)));
+					//System.out.println("Time(s): "+estimatedTime);
 				}
-				finally
+				catch (Exception ex)
 				{
-					if(keyboard != null)
-						keyboard.close();
+					System.out.println("Exception thrown: " + ex.getMessage());
 				}
 			}
-			else
+			//verify system state T18493_DList_LeaveMessage-t0
+			/*if(TestGroup[i] != -1)
 			{
-				//runsFails update, index 0 tracks total runs
-				runsFails[current] = runsFails[current] + 1;
-				System.out.print(result+" Failure: ");  
-				logger.info(result+" Failure: " + (current)+"/"+Length + " Group: " + group + " Current: " + 
-				plaHldr.replace(TEST_DIRNAME, "")+retries+ " :Fails/Runs:" +runsFails[current]+ "/" +runsFails[0]+ "\n"); 
-			}
+				try
+				{
+					//startTime = System.nanoTime();
+					result = RunJar("\\\\CWENGFS\\Tests\\TestJars\\TestJarsDev\\T18493_DList_LeaveMessage-t0.jar");
+					if(result == 1)
+						Thread.sleep(1000);
+					if(result < 0)
+						System.out.println("Verifing test has failed "+result);
+					//Print(Dictionary[i].toString(), TestGroup[i], i+1, fileLength, result, logger);
+					//estimatedTime = ((int)(System.nanoTime() - startTime/(10^9)));
+					//System.out.println("Time(s): "+estimatedTime);
+				}
+				catch (Exception ex){}
+			}*/
 		}
-		System.out.println((current)+"/"+Length + " Group: " + group + " Current: " + 
-		plaHldr.replace(TEST_DIRNAME, "") + " :Fails/Runs:" +runsFails[current]+ "/" +runsFails[0]);
-		if(result != 3) //3 is skipped
-			TCResult(plaHldr, result, runsFails[current], runsFails[0]);
-	}
-	
-	public static boolean compare(String string, String string2)
-	{
-		//string = (String)string.substring(0, string.length()-(FileType.length()+3)).replaceAll("[0-9]", "");
-		//string2 = (String)string2.substring(0, string2.length()-(FileType.length()+3)).replaceAll("[0-9]", "");
-		string = (String)string.replaceAll("[0-9]", "");
-		string = (String)string.substring(0, string.length()-(FileType.length()+2));
-		string2 = (String)string2.replaceAll("[0-9]", "");
-		string2 = (String)string2.substring(0, string2.length()-(FileType.length()+2));
-		return (string.contains(string2));
 	}
 	
 	public static int RunJar(String FilePath)
@@ -357,10 +297,148 @@ public class TestHarnessAuto
 		return result;
 	}
 	
+	public static void Print(String plaHldr, int group, int current, int Length, int result, Logger logger) throws Exception
+	{
+		Scanner keyboard = null;
+		int connection = 0;
+		String retries = "";
+		String failsCounter = "";
+		if(retry > 0)
+		{
+			retries = " Retries: "+retry; //this global retry int tracks when a failed test gets rerun and rechecked
+		}
+		
+		if(debug == 1)
+		{
+			System.out.print("DEBUG:: ");
+			logger.info("::DEBUG::");
+		}
+		if(result == 0 || result == 3) //successful or skipped test
+		{
+			if(result == 3)
+			{
+				System.out.print("SKIPPED:: ");
+				logger.info("::SKIPPED::");
+			}
+			if(runsFails[current] > 0)
+			{
+				failsCounter = " :Fails/Runs:" +runsFails[current]+ "/" +runsFails[0]; //how many times a test fails compared to total runs
+			}
+			System.out.print("Success: ");
+			logger.info("Success: " + (current)+"/"+Length + " Group: " + group + " Current: " + 
+			plaHldr.replace(TEST_DIRNAME, "") + failsCounter + retries + "\n"); 
+		}
+		else
+		{
+			if(result == -999 || result == -998) //Cyara telephony test encountered a specific problem
+			{
+				keyboard = null;
+				try
+				{
+					keyboard = new Scanner(System.in);
+					if(result == -999)
+					{
+						logger.info(result+" Connection Error: " + (current)+"/"+Length + " Group: " + group + " Current: " + plaHldr.replace(TEST_DIRNAME, "") + "\n");
+						//System.out.println("Connection Error: Choose 1 to continue or 0 to quit.");
+						connection = 1;//keyboard.nextInt(); //connection = 1;
+						Thread.sleep(120000);
+						if(connection == 0)
+							throw new Exception("Connection Error");
+						else if(connection == 1)
+							logger.info("continuing from connection error");
+					}
+					else if(result == -998)
+					{
+						logger.info(result+" Aborted: " + (current)+"/"+Length + " Group: " + group + " Current: " + plaHldr.replace(TEST_DIRNAME, "") + "\n");
+						System.out.println("Aborted current test: Choose 1 to continue or 0 to quit.");
+						connection = 1; //connection = keyboard.nextInt(); //connection = 1;
+						//Thread.sleep(120000);
+						if(connection == 0)
+							throw new Exception("Aborted");
+						else if(connection == 1)
+							logger.info("continuing from Abort");
+					}
+				}
+				finally
+				{
+					if(keyboard != null)
+						keyboard.close();
+				}
+			}
+			else //this path is for any unspecified failure code numbers
+			{
+				//# of runs to Fails update, index 0 tracks total runs
+				runsFails[current] = runsFails[current] + 1;
+				System.out.print(result+" Failure: ");  
+				logger.info(result+" Failure: " + (current)+"/"+Length + " Group: " + group + " Current: " + 
+				plaHldr.replace(TEST_DIRNAME, "")+retries+ " :Fails/Runs:" +runsFails[current]+ "/" +runsFails[0]+ "\n"); 
+			}
+		}
+		System.out.println((current)+"/"+Length + " Group: " + group + " Current: " + 
+		plaHldr.replace(TEST_DIRNAME, "") + " :Fails/Runs:" +runsFails[current]+ "/" +runsFails[0]);
+		if(result != 3) //3 is skipped
+			TCResult(plaHldr, result, runsFails[current], runsFails[0]); //TCResult informs TFS test case
+	}
 	
+	public static void twoDimension(Logger logger, int[] TestGroup, int result, File[] Dictionary, int CurrentD, int Length2D, int groupNum)
+	{
+		logger.info("2 Dimension \n");
+		CurrentD = 0;
+		String stage = "";
+		String plaHldr = "";
+		int j = 0;
+		
+		for(int i = 0; i < groupNum +1; i++)//1st group
+		{
+			for(int k = 0; k < groupNum +1; k++)//2nd group
+			{
+				if(i != k && i != -1 && k != -1)
+				{
+					for(int s = 0; s < 3; s++)
+					{
+						if(s == 0)
+							stage = "r";
+						if(s == 1)
+							stage = "s";
+						if(s == 2)
+							stage = "t";
+						
+						try
+						{
+							for(int n = 0; n < fileLength; n++)
+							{
+								if(TestGroup[n] == i)
+								{
+									plaHldr = Dictionary[n].toString();
+									groupTest(plaHldr, stage, TestGroup[n], logger, CurrentD, Length2D);
+								}
+								if(TestGroup[n] == k)
+								{
+									plaHldr = Dictionary[n].toString();
+									groupTest(plaHldr, stage, TestGroup[n], logger, CurrentD, Length2D);
+								}
+							}
+						}
+						catch (Exception ex){}
+					}
+				}
+				CurrentD++;
+			}
+		}
+	}
+	
+	public static void groupTest(String plaHldr, String stage, int group, Logger logger, int current, int length) throws Exception
+	{
+		int result = -1;
+		if(plaHldr.replaceAll("[0-9]", "").substring(plaHldr.length()-(FileType.length()+2), plaHldr.length()-(FileType.length()+1)).equals(stage))
+		{
+			result = RunJar(plaHldr);
+			Print(plaHldr, group, current, length, result, logger);
+		}
+	}
 	
 	public static boolean CheckTest(String testName)
-	{
+	{//checking tests that are split into (reset, setup, run) format to make sure that at least 1 of each component is present
 		String RX = "-" + testName.replaceAll("[0-9]", "").charAt(testName.length()-(FileType.length()+2)) + "0";
 		return (CheckExists(RX, "-r0", testName) && CheckExists(RX, "-s0", testName) && CheckExists(RX, "-t0", testName) );
 	}
@@ -435,95 +513,15 @@ public class TestHarnessAuto
 		}
 	}
 	
-	public static void oneDimension(Logger logger, int[] TestGroup, int result, File[] Dictionary)
+	public static boolean compare(String string, String string2)
 	{
-		long startTime = 0;
-		int estimatedTime = 0;
-		
-		logger.info("1 Dimension \n");
-		for(int i = 0; i < (fileLength); i++)
-		{
-			if(TestGroup[i] != -1)
-			{
-				try
-				{
-					//startTime = System.nanoTime();
-					result = RunJar(Dictionary[i].toString());
-					if(result == 1)
-						Thread.sleep(1000);
-					if(result < -900000)
-						System.out.println(""+result);
-					Print(Dictionary[i].toString(), TestGroup[i], i+1, fileLength, result, logger);
-					//estimatedTime = ((int)(System.nanoTime() - startTime/(10^9)));
-					//System.out.println("Time(s): "+estimatedTime);
-				}
-				catch (Exception ex){}
-			}
-			//verify system state T18493_DList_LeaveMessage-t0
-			/*if(TestGroup[i] != -1)
-			{
-				try
-				{
-					//startTime = System.nanoTime();
-					result = RunJar("\\\\CWENGFS\\Tests\\TestJars\\TestJarsDev\\T18493_DList_LeaveMessage-t0.jar");
-					if(result == 1)
-						Thread.sleep(1000);
-					if(result < 0)
-						System.out.println("Verifing test has failed "+result);
-					//Print(Dictionary[i].toString(), TestGroup[i], i+1, fileLength, result, logger);
-					//estimatedTime = ((int)(System.nanoTime() - startTime/(10^9)));
-					//System.out.println("Time(s): "+estimatedTime);
-				}
-				catch (Exception ex){}
-			}*/
-		}
-	}
-	
-	public static void twoDimension(Logger logger, int[] TestGroup, int result, File[] Dictionary, int CurrentD, int Length2D, int groupNum)
-	{
-		logger.info("2 Dimension \n");
-		CurrentD = 0;
-		String stage = "";
-		String plaHldr = "";
-		int j = 0;
-		
-		for(int i = 0; i < groupNum +1; i++)//1st group
-		{
-			for(int k = 0; k < groupNum +1; k++)//2nd group
-			{
-				if(i != k && i != -1 && k != -1)
-				{
-					for(int s = 0; s < 3; s++)
-					{
-						if(s == 0)
-							stage = "r";
-						if(s == 1)
-							stage = "s";
-						if(s == 2)
-							stage = "t";
-						
-						try
-						{
-							for(int n = 0; n < fileLength; n++)
-							{
-								if(TestGroup[n] == i)
-								{
-									plaHldr = Dictionary[n].toString();
-									groupTest(plaHldr, stage, TestGroup[n], logger, CurrentD, Length2D);
-								}
-								if(TestGroup[n] == k)
-								{
-									plaHldr = Dictionary[n].toString();
-									groupTest(plaHldr, stage, TestGroup[n], logger, CurrentD, Length2D);
-								}
-							}
-						}
-						catch (Exception ex){}
-					}
-				}
-				CurrentD++;
-			}
-		}
+		//string = (String)string.substring(0, string.length()-(FileType.length()+3)).replaceAll("[0-9]", "");
+		//string2 = (String)string2.substring(0, string2.length()-(FileType.length()+3)).replaceAll("[0-9]", "");
+		string = (String)string.replaceAll("[0-9]", "");
+		string = (String)string.substring(0, string.length()-(FileType.length()+2));
+		string2 = (String)string2.replaceAll("[0-9]", "");
+		string2 = (String)string2.substring(0, string2.length()-(FileType.length()+2));
+		return (string.contains(string2));
 	}
 	
 	public static boolean getTimeOfDay()
